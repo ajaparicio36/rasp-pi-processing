@@ -3,19 +3,43 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: 187 30% 7%;
+  --foreground: 187 41% 91%;
+  --card: 187 30% 12%;
+  --card-foreground: 187 41% 91%;
+  --popover: 187 30% 12%;
+  --popover-foreground: 187 41% 91%;
+  --primary: 187 80% 72%;
+  --primary-foreground: 187 30% 7%;
+  --secondary: 187 84% 33%;
+  --secondary-foreground: 187 41% 95%;
+  --muted: 187 30% 16%;
+  --muted-foreground: 187 41% 76%;
+  --accent: 187 97% 58%;
+  --accent-foreground: 187 30% 7%;
+  --destructive: 0 84% 70%;
+  --destructive-foreground: 187 30% 7%;
+  --border: 187 30% 16%;
+  --input: 187 30% 16%;
+  --ring: 187 80% 72%;
+  --radius: 0.5rem;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom styles for glowing effect */
+.glow-text {
+  text-shadow: 0 0 10px rgba(132, 223, 235, 0.7), 0 0 20px rgba(132, 223, 235, 0.5), 0 0 30px rgba(132, 223, 235, 0.3);
+}
+
