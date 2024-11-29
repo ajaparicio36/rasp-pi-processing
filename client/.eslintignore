@@ -1,0 +1,4 @@
+./tailwind.*
+./components/ui/*
+./src/components/AudioRecorder.tsx
+./src/hooks/use-toast.ts
