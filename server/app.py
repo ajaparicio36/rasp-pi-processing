@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify, send_file
 from pydub import AudioSegment
 import librosa
 import librosa.effects
+import matplotlib
+matplotlib.use('Agg')  # Set the backend before importing pyplot
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal
@@ -12,6 +14,9 @@ from scipy.io import wavfile
 
 app = Flask(__name__)
 CORS(app)
+
+# Ensure the static directory exists
+os.makedirs('./static', exist_ok=True)
 
 current_audio_state = {
     'raw_filepath': None,
@@ -23,31 +28,34 @@ current_audio_state = {
 
 def create_visualization(y_raw, y_processed, sr, title, output_path):
     plt.figure(figsize=(12, 6))
-    plt.subplot(2, 2, 1)
-    librosa.display.waveshow(y_raw, sr=sr)
-    plt.title('Original Waveform')
     
-    plt.subplot(2, 2, 2)
-    D = librosa.stft(y_raw)
-    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-    librosa.display.specshow(S_db, sr=sr, y_axis='hz', x_axis='time')
-    plt.colorbar(format='%+2.0f dB')
-    plt.title('Original Spectrogram')
-    
-    plt.subplot(2, 2, 3)
-    librosa.display.waveshow(y_processed, sr=sr)
-    plt.title(f'{title} Waveform')
-    
-    plt.subplot(2, 2, 4)
-    D_processed = librosa.stft(y_processed)
-    S_db_processed = librosa.amplitude_to_db(np.abs(D_processed), ref=np.max)
-    librosa.display.specshow(S_db_processed, sr=sr, y_axis='hz', x_axis='time')
-    plt.colorbar(format='%+2.0f dB')
-    plt.title(f'{title} Spectrogram')
-    
-    plt.tight_layout()
-    plt.savefig(output_path)
-    plt.close()
+    # Use non-interactive mode for thread safety
+    with plt.style.context('default'):
+        plt.subplot(2, 2, 1)
+        librosa.display.waveshow(y_raw, sr=sr)
+        plt.title('Original Waveform')
+        
+        plt.subplot(2, 2, 2)
+        D = librosa.stft(y_raw)
+        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+        librosa.display.specshow(S_db, sr=sr, y_axis='hz', x_axis='time')
+        plt.colorbar(format='%+2.0f dB')
+        plt.title('Original Spectrogram')
+        
+        plt.subplot(2, 2, 3)
+        librosa.display.waveshow(y_processed, sr=sr)
+        plt.title(f'{title} Waveform')
+        
+        plt.subplot(2, 2, 4)
+        D_processed = librosa.stft(y_processed)
+        S_db_processed = librosa.amplitude_to_db(np.abs(D_processed), ref=np.max)
+        librosa.display.specshow(S_db_processed, sr=sr, y_axis='hz', x_axis='time')
+        plt.colorbar(format='%+2.0f dB')
+        plt.title(f'{title} Spectrogram')
+        
+        plt.tight_layout()
+        plt.savefig(output_path)
+        plt.close('all')  # Ensure all figures are closed
 
 def save_audio(y, sr, output_path):
     y = librosa.util.normalize(y)
@@ -157,7 +165,7 @@ def apply_gain():
         return jsonify({"error": f"Gain processing failed: {str(e)}"}), 500
 
 @app.route('/apply-compression', methods=['POST'])
-def apply_compression():
+def apply_compression_route():
     try:
         if current_audio_state['y_processed'] is None:
             return jsonify({"error": "No processed audio available. Apply a gain first."}), 400
